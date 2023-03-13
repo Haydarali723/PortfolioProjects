@@ -68,3 +68,24 @@ where d.continent is not null
 )
 select *,(RollingPeopleVaccinated/population)*100
 from PopVsVac
+
+create view vw_PopVsVac
+as 
+with PopVsVac(Continent,location,date,population,new_vaccinations,RollingPeopleVaccinated)
+as
+(
+select d.continent,
+d.location,
+d.date,
+d.population,
+v.new_vaccinations,
+SUM(v.new_vaccinations) over (partition by d.location order by d.location,d.date) as RollingPeopleVaccinated
+from CovidVaccinations v
+join CovidDeaths d 
+on v.date=d.date
+and v.location=d.location
+where d.continent is not null
+)
+select *,(RollingPeopleVaccinated/population)*100
+from PopVsVac
+)
